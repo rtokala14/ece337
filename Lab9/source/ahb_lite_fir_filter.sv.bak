@@ -1,0 +1,76 @@
+// $Id: $
+// File name:   ahb_lite_fir_filter.sv
+// Created:     3/18/2019
+// Author:      ZhiFei Chen
+// Lab Section: 337-04
+// Version:     1.0  Initial Design Entry
+// Description: this contains all the function calls
+module ahb_lite_fir_filter(
+	input wire clk,
+	input wire n_rst,
+	input wire hsel,
+	input wire hsisze,
+	input wire [3:0] haddr,
+	input wire [1:0] htrans,
+	input wire hwrite,
+	input wire [15:0] hwdata,
+	output reg [15:0] hrdata,
+	output reg hresp);
+//local decla
+
+wire data_ready, modwait, err, new_coefficient_set, load_coeff;
+wire [15:0] sample_data;
+wire [15:0] fir_coefficient;
+wire [15:0] fir_out;
+wire [1:0] coefficient_num;
+
+ahb_lite_slave SLAVE (
+			.clk(clk),
+			.n_rst(n_rst),
+			.sample_data(sample_data),
+			.data_ready(data_ready),
+			.fir_coefficient(fir_coefficient),
+			.new_coefficient_set(new_coefficient_set),
+			.coefficient_num(coefficient_num),
+			.modwait(modwait),
+			.fir_out(fir_out),
+			.err(err),
+			.hsel(hsel),
+			.haddr(haddr),
+			.hsize(hsize),
+			.htrans(htrans),	
+			.hwrite(hwrite),
+			.hwdata(hwdata),
+			.hrdata(hrdata),
+			.hresp(hresp));
+coefficient_loader LOADER(
+			.clk(clk),
+			.n_reset(n_rst),
+			.new_coefficient_set(new_coefficient_set),
+			.modwait(modwait),
+			.load_coeff(load_coeff),
+			.coefficient_num(coefficient_num));
+fir_filter FIR(
+			.clk(clk),
+			.n_reset(n_rst),
+			.sample_data(sample_data),
+			.fir_coefficient(fir_coefficient),
+			.load_coeff(load_coeff),
+			.data_ready(data_ready),
+			.one_k_samples(),
+			.modwait(modwait),
+			.fir_out(fir_out),
+			.err(err));
+
+			
+endmodule
+
+
+
+
+
+
+
+
+
+			

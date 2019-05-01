@@ -1,0 +1,13 @@
+Q1: The difference between those three are listed below:
+	the first image filtered all the horizontal lines.
+	the second image filtered all the vertical lines.
+	the third image filtered everything but the horizontal & vertical lines.
+	it make sense since a filter can filter out different pattern giving different coefficient.
+
+Q2:
+	The general fucntion are like $func() such as $fseek(), $fopen(), and $fclose() for file I/O.
+
+
+Q3:
+	the different format specifier are listed below:
+	%c, %d, %s, %nd... it it also for file I/O. 

@@ -1,0 +1,165 @@
+// $Id: $
+// File name:   apb_slave.sv
+// Created:     3/1/2019
+// Author:      ZhiFei Chen
+// Lab Section: 337-04
+// Version:     1.0  Initial Design Entry
+// Description: this is the apb_slave block
+module apb_slave(
+	input wire clk,
+	input wire n_rst,
+	input wire [7:0] rx_data,
+	input wire data_ready,
+	input wire overrun_error,
+	input wire framing_error,
+	output reg data_read,
+	input wire psel,
+	input wire [2:0] paddr,
+	input wire penable,
+	input wire pwrite,
+	input wire [7:0] pwdata,
+	output reg [7:0] prdata,
+	output reg pslverr,
+	output reg [3:0] data_size,
+	output reg [13:0] bit_period);
+	
+	typedef enum bit [1:0] {IDLE, ERR, WRITE, READ}stateType;
+	stateType state;
+	stateType next_state;
+	reg [7:0] address [0:6];
+	reg [7:0] next_address [0:6];
+
+	always_ff @(posedge clk, negedge n_rst) begin
+		if(n_rst == 0) begin
+			state <= IDLE;
+			address[0] <=  8'b0;
+			address[1] <=  8'b0;
+			address[2] <=  8'b0;
+			address[3] <=  8'b0;	
+			address[4] <=  8'b0;
+			address[5] <=  8'b0;
+			address[6] <=  8'b0;
+		end
+		else begin
+			state <= next_state;
+			address <= next_address;
+		end
+	end
+	always_comb
+	begin: STATE_TRANSITION
+		next_state = IDLE; //initialize
+		case(state)
+			IDLE: begin
+				if (psel) begin
+					if (pwrite == 1'b0 && (paddr == 3'd0 || paddr == 3'd1 || paddr == 3'd2 || paddr == 3'd3 || paddr == 3'd4 || paddr == 3'd6)) begin
+						next_state = READ;
+					end
+					else if (pwrite == 1'b1 && (paddr == 3'd2 || paddr == 3'd3 || paddr == 3'd4)) begin
+						next_state = WRITE;
+					end
+					else begin
+						next_state = ERR;
+					end
+				end
+				else begin
+					next_state = IDLE;
+				end
+			end
+			ERR: begin
+				next_state = IDLE;
+			end
+			WRITE: begin
+				next_state = IDLE;
+			end
+			READ: begin
+				next_state = IDLE;
+			end
+		endcase
+	end
+/*
+	always_comb
+	begin: PSLVERR
+		pslverr = 0;
+		case(state)
+			IDLE: begin
+				pslverr = 0;
+			end
+			ERR: begin
+				pslverr = 1;
+			end	
+			WRITE: begin
+				pslverr = 0;
+			end	
+			READ: begin
+				pslverr = 0;
+			end
+	endcase
+	end*/
+	/////local variable
+
+
+	always_comb 
+	begin: updata_address
+		data_read = 1'b0;
+		pslverr = 1'b0;
+		next_address = address;
+	        prdata = address[0];
+	   
+		
+               // if(address[4] == 5)
+	//	    next_address[6] = {3'b0, rx_data[7:3]};
+	    //    if(address[4] == 7)
+	//	    next_address[6] = {3'b0, rx_data[7:1]};
+	  //      if(address[4] == 8)
+		  next_address[6] = rx_data;
+	   
+	     
+		
+
+
+
+                next_address[0] = data_ready;
+		
+		
+		if (framing_error == 1) begin
+			next_address[1] = 2;
+		end
+		else if (overrun_error == 1) begin
+			next_address[1] = 1;
+		end
+		else begin
+			next_address[1] = 0;
+		end
+		
+		case(state)
+			WRITE: begin
+				next_address[paddr] = pwdata;
+			end
+			READ: begin	
+				prdata = address[paddr];
+				if(paddr == 6)begin
+					data_read = 1;
+				end
+			end
+			ERR: begin
+				pslverr = 1'b1;
+			end
+		endcase
+		data_size = address[4];
+		bit_period = {address[3], address[2]};
+
+end
+				
+			
+			
+
+			
+			
+						
+			
+
+endmodule		
+		
+
+
+
