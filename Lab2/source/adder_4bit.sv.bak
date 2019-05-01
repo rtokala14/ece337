@@ -1,0 +1,7 @@
+// $Id: $
+// File name:   adder_4bit.sv
+// Created:     1/18/2019
+// Author:      ZhiFei Chen
+// Lab Section: 337-04
+// Version:     1.0  Initial Design Entry
+// Description: 4bit adder

@@ -1,0 +1,24 @@
+// $Id: $
+// File name:   sensor_b.sv
+// Created:     1/18/2019
+// Author:      ZhiFei Chen
+// Lab Section: 337-04
+// Version:     1.0  Initial Design Entry
+// Description: behavioral style.
+
+module sensor_b(
+	input wire [3:0]sensors,
+	output reg error);
+	reg and1;
+	reg and2;
+	reg or1;
+  always_comb begin
+	
+	 and1 = sensors[1] & sensors[2];
+	 and2 = sensors[3] & sensors[1];
+	 or1 = and1 | and2;
+	 error = or1 | sensors[0];
+   end
+
+endmodule
+	
